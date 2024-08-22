@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./bootstrap-5.3.3-dist/css/bootstrap.css">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Add an employee :-</h2>
+<div class="container">
+    <div class="row">
+
+        <div class="mb-3">
+            <label for="id" class="form-label">id :</label>
+            <input type="text" class="form-control" readonly id="id">
+          </div>
+          <div class="mb-3">
+            <label for="firstname" class="form-label">FirstName :</label>
+            <input type="text" class="form-control" id="firstname">
+          </div>
+          <div class="mb-3">
+            <label for="lastname" class="form-label">LastName :</label>
+            <input type="text" class="form-control" id="lastname">
+          </div>
+          <div class="mb-3">
+            <label for="age" class="form-label">Age :</label>
+            <input type="text" class="form-control" id="age">
+        </div>
+        <div class="mb-3">
+            <label for="salary" class="form-label">Salary :</label>
+            <input type="text" class="form-control" id="salary">
+        </div>
+        <div class="mb-3">
+            <label for="department" class="form-label">Department :</label>
+            <input type="text" class="form-control" id="department">
+        </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="gender" id="Male" value="Male">
+            <label class="form-check-label" for="Male">
+              Male
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="gender" id="female"  value="female">
+            <label class="form-check-label" for="female">
+              female
+            </label>
+          </div>
+          <br><br>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary" onclick="saveStudent()">Send</button>
+            <button type="submit" class="btn btn-primary" onclick="ShowStudent()">Show</button>
+          </div>
+          <div class="col-md-10">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <td>FirstName</td>
+                        <td>LastName</td>
+                        <td>Age</td>
+                        <td>Salary</td>
+                        <td>department</td>
+                        <td>Delete</td>
+                        <td>Update</td>
+                    </tr>
+                </thead> <br>
+                <h2>employees Table:-</h2>
+                <Tbody id="tbody">
+                </Tbody>
+            </table>
+          </div>
+
+    </div>
+</div>
+    <script>
+
+        
+function saveStudent() {
+    var id = document.getElementById("id").value;
+    var firstname = document.getElementById("firstname").value;
+    var lastname = document.getElementById("lastname").value;
+    var age = parseInt(document.getElementById("age").value);
+    var salary = parseInt(document.getElementById("salary").value);
+    var department = document.getElementById("department").value;
+    var gender = document.querySelector("input[name='gender']:checked").value;
+
+
+  
+    var student = {
+        FirstName: firstname,
+        LastName: lastname,
+        Age: age,
+        Salary: salary,
+        Department: department,
+        Gender: gender
+}
+
+
+    // console.log(student);
+
+
+    if (id == "") {
+        try {
+            var xhr = new XMLHttpRequest()
+            xhr.open('POST', 'https://firstproject-93d10-default-rtdb.firebaseio.com/student.json')
+            xhr.setRequestHeader('Content-Type', 'application/json')
+            xhr.send(JSON.stringify(student))
+            xhr.addEventListener('readystatechange', function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log(JSON.parse(xhr.responseText));
+                }
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    } else {
+        var xhr = new XMLHttpRequest()
+        xhr.open('PATCH', `https://firstproject-93d10-default-rtdb.firebaseio.com/student/${id}.json`)
+        xhr.setRequestHeader('Content-Type', 'application/json')
+        xhr.send(JSON.stringify(student))
+        xhr.addEventListener('readystatechange', function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                console.log(JSON.parse(xhr.responseText));
+            }
+        })
+    }
+
+}
+    // try {
+    //     var xhr = new XMLHttpRequest();
+    //     xhr.open("POST"," link /student.json");
+    //     xhr.setRequestHeader('Content-type','application/json');
+    //     xhr.send(JSON.stringify(student));
+    //     xhr.addEventListener("readystatechange", function(){
+    //         if (xhr.readyState==4 && xhr.status==200){
+    //         console.log(JSON.parse(xhr.responseText));
+    //         }
+    // })
+
+    // } catch (error){
+    //     console.log(error);
+    // }
+
+
+
+    function ShowStudent() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "https://firstproject-93d10-default-rtdb.firebaseio.com/student.json");
+    xhr.send();
+    xhr.addEventListener("readystatechange", function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            var data = JSON.parse(xhr.responseText);
+            var tbody = document.getElementById("tbody");
+            tbody.innerHTML = "";
+            for (const key in data) {
+                // console.log(data[key]).LastName;
+                tbody.innerHTML += `
+                <tr>
+                    <td>${data[key].FirstName}</td>
+                    <td>${data[key].LastName}</td>
+                    <td>${data[key].Age}</td>
+                    <td>${data[key].Salary}</td>
+                    <td>${data[key].Department}</td>
+                    <td>${data[key].Gender}</td>
+                    <td><button class="btn btn-danger" onclick="deleteStudent('${key}')">Delete</button></td>
+                    <td><button class="btn btn-success" onclick="updateStudent('${key}', '${data[key].FirstName}', '${data[key].LastName}', ${data[key].Age}, ${data[key].Salary}, '${data[key].Department}', '${data[key].Gender}')">Update</button></td>
+                </tr>
+                `;
+            }
+        }
+    });
+}
+
+
+
+
+// function ShowStudent(){
+//     var xhr = new XMLHttpRequest();
+//     xhr.open("GET","https://firstproject-93d10-default-rtdb.firebaseio.com/student.json");
+//     xhr.send();
+//     xhr.addEventListener("readystatechange", function(){
+//         if(xhr.readyState==4 && xhr.status==200){
+//             var data = JSON.parse(xhr.responseText);
+//             // console.log(student);
+//             var tbody =document.getElementById("tbody")
+//             for (const key in data) {
+//                 console.log(data[key]).salary;
+//                 tbody.innerHTML += `
+//                 <tr>
+//                     <td>${student.FirstName}</td>
+//                     <td>${student.lastName}</td>
+//                     <td>${student.age}</td>
+//                     <td>${salary}</td>  <td>${student.Department}</td>
+//                     <td>${student.gender}</td>
+//                     <td><button class="btn btn-danger" onclick="deleteStudent('${key}')">Delete</button></td>
+//                     <td><button class="btn btn-success" onclick="updateStudent('${key}', '${student.FirstName}', '${student.lastName}', '${student.age}', '${salary}', '${student.Department}', '${student.gender}')">Update</button></td>
+//                 </tr>
+//                 `
+//                 }
+//             }
+            
+// }
+// )}
+
+function deleteStudent(id){
+var isAgree= confirm("are you sure want delete ?")
+try {
+    if(isAgree){
+        var xhr = new XMLHttpRequest();
+        xhr.open("DELETE", `https://firstproject-93d10-default-rtdb.firebaseio.com/student/${id}.json`)
+        xhr.send();
+    }
+}
+
+catch (error) {
+      console.log(error);
+}
+} 
+
+function updateStudent(id,firstname,lastname,age,salary,department,gender){
+    document.getElementById("id").value = id ;
+    document.getElementById("firstname").value = firstname;
+    document.getElementById("lastname").value = lastname;
+    document.getElementById("age").value = age ;
+    document.getElementById("salary").value = salary ;
+    document.getElementById("department").value = department ;
+    if (gender == "male"){
+        document.querySelectorAll("input[name = 'gender']")[0].checked = true ;
+    } else {
+        document.querySelectorAll("input[name = 'gender']")[1].checked = true ;
+
+    }
+
+}
+
+
+    </script>
+    <script src="./bootstrap-5.3.3-dist/js/bootstrap.bundle.js"></script>
+
+
+<!-- 
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCavurxvRdQmKHnh24k96EaxtvCFVkoScM",
+          authDomain: "firstproject-93d10.firebaseapp.com",
+          projectId: "firstproject-93d10",
+          storageBucket: "firstproject-93d10.appspot.com",
+          messagingSenderId: "945155356985",
+          appId: "1:945155356985:web:d6d86366761862317b90e8"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+      </script> -->
+
+
+
+
+</body>
+</html>
